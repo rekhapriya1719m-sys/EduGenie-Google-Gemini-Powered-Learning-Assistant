@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGenie - AI Learning Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+    
+    <!-- Navbar -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🧞‍♂️</span>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    EduGenie
+                </h1>
+            </div>
+            <span class="text-xs bg-slate-800 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/30">
+                Powered by Google Gemini
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-6 py-8 flex-grow w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Controls Sidebar -->
+            <div class="space-y-6">
+                <!-- Mode Selector Card -->
+                <div class="bg-slate-800/60 rounded-xl p-5 border border-slate-700">
+                    <h2 class="text-lg font-semibold text-slate-200 mb-4">Choose Feature</h2>
+                    <div class="space-y-2">
+                        <button onclick="setMode('ask')" id="btn-ask" class="w-full text-left px-4 py-2.5 rounded-lg font-medium transition bg-blue-600 text-white">
+                            💬 Ask AI Tutor
+                        </button>
+                        <button onclick="setMode('quiz')" id="btn-quiz" class="w-full text-left px-4 py-2.5 rounded-lg font-medium transition bg-slate-700 hover:bg-slate-600 text-slate-300">
+                            📝 Quiz Generator
+                        </button>
+                        <button onclick="setMode('summarize')" id="btn-summarize" class="w-full text-left px-4 py-2.5 rounded-lg font-medium transition bg-slate-700 hover:bg-slate-600 text-slate-300">
+                            📄 Note Summarizer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Guidance Info -->
+                <div class="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50 text-sm text-slate-400">
+                    <h3 class="font-medium text-slate-300 mb-2">💡 Quick Tips:</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Ask for step-by-step solutions to homework problems.</li>
+                        <li>Type any topic name to instantly practice with AI quizzes.</li>
+                        <li>Paste messy lecture notes to extract key bullet points.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Interaction Panel -->
+            <div class="md:col-span-2 bg-slate-800/60 rounded-xl p-6 border border-slate-700 flex flex-col min-h-[500px]">
+                
+                <!-- Inputs Section -->
+                <div id="section-ask" class="space-y-4">
+                    <h2 class="text-xl font-bold text-slate-100">Ask Your AI Tutor</h2>
+                    <textarea id="ask-input" rows="4" placeholder="Ask anything (e.g., Explain Newton's Third Law with real-world examples)..." class="w-full p-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:border-blue-500"></textarea>
+                    <button onclick="submitAsk()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg text-white">Ask Question</button>
+                </div>
+
+                <div id="section-quiz" class="space-y-4 hidden">
+                    <h2 class="text-xl font-bold text-slate-100">Generate Practice Quiz</h2>
+                    <input id="quiz-topic" type="text" placeholder="Enter topic (e.g., Photosynthesis, Calculus, World War II)..." class="w-full p-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:border-blue-500">
+                    <button onclick="submitQuiz()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg text-white">Generate Quiz</button>
+                </div>
+
+                <div id="section-summarize" class="space-y-4 hidden">
+                    <h2 class="text-xl font-bold text-slate-100">Summarize Lecture Notes</h2>
+                    <textarea id="summarize-input" rows="5" placeholder="Paste your study notes or article text here..." class="w-full p-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:border-blue-500"></textarea>
+                    <button onclick="submitSummarize()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 font-semibold rounded-lg text-white">Summarize</button>
+                </div>
+
+                <hr class="my-6 border-slate-700">
+
+                <!-- Output Area -->
+                <div class="flex-grow flex flex-col">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">Response</h3>
+                    <div id="output-box" class="p-4 rounded-lg bg-slate-900/80 border border-slate-700/80 min-h-[200px] text-slate-200 overflow-y-auto max-h-[400px]">
+                        <span class="text-slate-500 italic">Select a feature and submit a prompt to begin learning...</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let currentMode = 'ask';
+
+        function setMode(mode) {
+            currentMode = mode;
+            ['ask', 'quiz', 'summarize'].forEach(m => {
+                document.getElementById(`section-${m}`).classList.toggle('hidden', m !== mode);
+                const btn = document.getElementById(`btn-${m}`);
+                if (m === mode) {
+                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium transition bg-blue-600 text-white";
+                } else {
+                    btn.className = "w-full text-left px-4 py-2.5 rounded-lg font-medium transition bg-slate-700 hover:bg-slate-600 text-slate-300";
+                }
+            });
+        }
+
+        async function postData(url, body) {
+            const outputBox = document.getElementById('output-box');
+            outputBox.innerHTML = '<span class="text-cyan-400 animate-pulse">🧞‍♂️ EduGenie is thinking...</span>';
+            
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                return data;
+            } catch (err) {
+                outputBox.innerHTML = `<span class="text-red-400">Error connecting to server: ${err.message}</span>`;
+            }
+        }
+
+        async function submitAsk() {
+            const prompt = document.getElementById('ask-input').value;
+            if (!prompt) return;
+            const data = await postData('/api/ask', { prompt });
+            if (data && data.response) {
+                document.getElementById('output-box').innerHTML = marked.parse(data.response);
+            }
+        }
+
+        async function submitQuiz() {
+            const topic = document.getElementById('quiz-topic').value;
+            if (!topic) return;
+            const data = await postData('/api/quiz', { topic, num_questions: 3 });
+            if (data && data.quiz) {
+                document.getElementById('output-box').innerHTML = marked.parse(data.quiz);
+            }
+        }
+
+        async function submitSummarize() {
+            const text = document.getElementById('summarize-input').value;
+            if (!text) return;
+            const data = await postData('/api/summarize', { text });
+            if (data && data.summary) {
+                document.getElementById('output-box').innerHTML = marked.parse(data.summary);
+            }
+        }
+    </script>
+</body>
+</html>

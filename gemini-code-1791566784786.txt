@@ -1,0 +1,7 @@
+edugenie-app/
+├── app.py
+├── requirements.txt
+├── .env
+├── README.md
+└── templates/
+    └── index.html

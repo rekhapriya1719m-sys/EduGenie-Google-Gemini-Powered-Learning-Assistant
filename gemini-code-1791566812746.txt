@@ -1,0 +1,2 @@
+# Replace with your actual Gemini API Key from Google AI Studio
+GEMINI_API_KEY=YOUR_GOOGLE_GEMINI_API_KEY_HERE
